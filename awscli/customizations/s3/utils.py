@@ -27,8 +27,7 @@ from dateutil.tz import tzlocal, tzutc
 from botocore.compat import unquote_str
 from s3transfer.subscribers import BaseSubscriber
 
-from awscli.compat import six
-from awscli.compat import PY3
+from awscli.compat import bytes_print
 from awscli.compat import queue
 
 LOGGER = logging.getLogger(__name__)
@@ -405,24 +404,6 @@ def uni_print(statement, out_file=None):
             new_encoding, 'replace').decode(new_encoding)
         out_file.write(new_statement)
     out_file.flush()
-
-
-def bytes_print(statement, stdout=None):
-    """
-    This function is used to properly write bytes to standard out.
-    """
-    if stdout is None:
-        stdout = sys.stdout
-
-    if PY3:
-        if getattr(stdout, 'buffer', None):
-            stdout.buffer.write(statement)
-        else:
-            # If it is not possible to write to the standard out buffer.
-            # The next best option is to decode and write to standard out.
-            stdout.write(statement.decode('utf-8'))
-    else:
-        stdout.write(statement)
 
 
 class StdoutBytesWriter(object):

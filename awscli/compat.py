@@ -38,6 +38,13 @@ except ImportError:
 
 
 class BinaryStdout(object):
+    """ This context manager sets the line-end translation mode for stdout.
+
+    It is deliberately set to binary mode so that `\r` does not get added to
+    the line ending. This can be useful when printing commands where a
+    windows style line ending would casuse errors.
+    """
+
     def __enter__(self):
         if sys.platform == "win32":
             import msvcrt
@@ -48,7 +55,25 @@ class BinaryStdout(object):
     def __exit__(self, type, value, traceback):
         if sys.platform == "win32":
             import msvcrt
-            msvcrt.setmode(sys.stdout.fileno(), self.previous_mode)                
+            msvcrt.setmode(sys.stdout.fileno(), self.previous_mode)
+
+
+def bytes_print(statement, stdout=None):
+    """
+    This function is used to write raw bytes to stdout.
+    """
+    if stdout is None:
+        stdout = sys.stdout
+
+    if PY3:
+        if getattr(stdout, 'buffer', None):
+            stdout.buffer.write(statement)
+        else:
+            # If it is not possible to write to the standard out buffer.
+            # The next best option is to decode and write to standard out.
+            stdout.write(statement.decode('utf-8'))
+    else:
+        stdout.write(statement)
 
 
 if six.PY3:
