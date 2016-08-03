@@ -14,8 +14,8 @@
 import mock
 
 from awscli.testutils import BaseAWSCommandParamsTest, FileCreator
+from awscli.testutils import capture_input
 from awscli.compat import six
-from tests import MockStdIn
 
 
 class TestCPCommand(BaseAWSCommandParamsTest):
@@ -450,7 +450,7 @@ class TestStreamingCPCommand(BaseAWSCommandParamsTest):
             'ETag': '"c8afdb36c52cf4727836669019e69222"'
         }]
 
-        with MockStdIn(b'foo\n'):
+        with capture_input(b'foo\n'):
             self.run_cmd(command)
 
         self.assertEqual(len(self.operations_called), 1)
@@ -470,7 +470,7 @@ class TestStreamingCPCommand(BaseAWSCommandParamsTest):
             'ETag': '"c8afdb36c52cf4727836669019e69222"'
         }]
 
-        with MockStdIn(b'foo\n'):
+        with capture_input(b'foo\n'):
             self.run_cmd(command)
 
         self.assertEqual(len(self.operations_called), 1)

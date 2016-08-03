@@ -390,7 +390,7 @@ class S3TransferStreamHandler(BaseS3Handler):
     MAX_IN_MEMORY_CHUNKS = 6
 
     def __init__(self, session, params, result_queue=None,
-                 runtime_config=None):
+                 runtime_config=None, manager=None):
         super(S3TransferStreamHandler, self).__init__(
             session, params, result_queue, runtime_config)
         self.config = create_transfer_config_from_runtime_config(
@@ -400,10 +400,14 @@ class S3TransferStreamHandler(BaseS3Handler):
         self.config.max_in_memory_upload_chunks = \
             self.MAX_IN_MEMORY_CHUNKS
 
-    def call(self, files, manager=None):
+        self._manager = manager
+
+    def call(self, files):
         # There is only ever one file in a stream transfer.
         file = files[0]
-        if manager is None:
+        if self._manager is not None:
+            manager = self._manager
+        else:
             manager = TransferManager(file.client, self.config)
 
         if file.operation_name == 'upload':
