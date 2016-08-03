@@ -30,6 +30,7 @@ from awscli.customizations.s3.utils import StdoutBytesWriter
 from awscli.customizations.s3.utils import ProvideSizeSubscriber
 from awscli.compat import six
 from awscli.compat import queue
+from awscli.compat import binary_stdin
 
 
 LOGGER = logging.getLogger(__name__)
@@ -479,16 +480,11 @@ class S3TransferStreamHandler(BaseS3Handler):
                 self.config.multipart_chunksize)
         self.config.multipart_chunksize = chunksize
 
-        stream_filein = sys.stdin
-        if six.PY3:
-            # This is to get a binary stdin
-            stream_filein = sys.stdin.buffer
-
         params = {}
         RequestParamsMapper.map_put_object_params(params, self.params)
 
         future = manager.upload(
-            fileobj=stream_filein, bucket=bucket,
+            fileobj=binary_stdin, bucket=bucket,
             key=key, extra_args=params, subscribers=subscribers)
 
         return self._process_transfer(future)

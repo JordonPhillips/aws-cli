@@ -84,6 +84,8 @@ if six.PY3:
 
     raw_input = input
 
+    binary_stdin = sys.stdin.buffer
+
     def get_stdout_text_writer():
         return sys.stdout
 
@@ -111,6 +113,8 @@ else:
     from urllib2 import URLError
 
     raw_input = raw_input
+
+    binary_stdin = sys.stdin
 
     def get_stdout_text_writer():
         # In python3, all the sys.stdout/sys.stderr streams are in text

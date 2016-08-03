@@ -450,7 +450,9 @@ class TestStreamingCPCommand(BaseAWSCommandParamsTest):
             'ETag': '"c8afdb36c52cf4727836669019e69222"'
         }]
 
-        with capture_input(b'foo\n'):
+        binary_stdin = six.BytesIO(b'foo\n')
+        location = "awscli.customizations.s3.s3handler.binary_stdin"
+        with mock.patch(location, binary_stdin):
             self.run_cmd(command)
 
         self.assertEqual(len(self.operations_called), 1)
@@ -470,7 +472,9 @@ class TestStreamingCPCommand(BaseAWSCommandParamsTest):
             'ETag': '"c8afdb36c52cf4727836669019e69222"'
         }]
 
-        with capture_input(b'foo\n'):
+        binary_stdin = six.BytesIO(b'foo\n')
+        location = "awscli.customizations.s3.s3handler.binary_stdin"
+        with mock.patch(location, binary_stdin):
             self.run_cmd(command)
 
         self.assertEqual(len(self.operations_called), 1)
