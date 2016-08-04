@@ -28,7 +28,7 @@ from awscli.customizations.s3.transferconfig import RuntimeConfig, \
 from awscli.customizations.s3.utils import RequestParamsMapper
 from awscli.customizations.s3.utils import StdoutBytesWriter
 from awscli.customizations.s3.utils import ProvideSizeSubscriber
-from awscli.compat import six
+from awscli.customizations.s3.utils import uni_print
 from awscli.compat import queue
 from awscli.compat import binary_stdin
 
@@ -504,5 +504,6 @@ class S3TransferStreamHandler(BaseS3Handler):
         except Exception as e:
             LOGGER.debug('Exception caught during task execution: %s',
                          str(e), exc_info=True)
-            self.result_queue.put(PrintTask(message=str(e), error=True))
+            # TODO: Update when S3Handler is refactored
+            uni_print("Transfer failed: %s \n" % str(e))
             return CommandResult(1, 0)
