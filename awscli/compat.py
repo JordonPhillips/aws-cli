@@ -58,24 +58,6 @@ class BinaryStdout(object):
             msvcrt.setmode(sys.stdout.fileno(), self.previous_mode)
 
 
-def bytes_print(statement, stdout=None):
-    """
-    This function is used to write raw bytes to stdout.
-    """
-    if stdout is None:
-        stdout = sys.stdout
-
-    if PY3:
-        if getattr(stdout, 'buffer', None):
-            stdout.buffer.write(statement)
-        else:
-            # If it is not possible to write to the standard out buffer.
-            # The next best option is to decode and write to standard out.
-            stdout.write(statement.decode('utf-8'))
-    else:
-        stdout.write(statement)
-
-
 if six.PY3:
     import locale
     import urllib.parse as urlparse
@@ -103,6 +85,20 @@ if six.PY3:
         if 'b' not in mode:
             encoding = locale.getpreferredencoding()
         return open(filename, mode, encoding=encoding)
+
+    def bytes_print(statement, stdout=None):
+        """
+        This function is used to write raw bytes to stdout.
+        """
+        if stdout is None:
+            stdout = sys.stdout
+
+        if getattr(stdout, 'buffer', None):
+            stdout.buffer.write(statement)
+        else:
+            # If it is not possible to write to the standard out buffer.
+            # The next best option is to decode and write to standard out.
+            stdout.write(statement.decode('utf-8'))
 
 else:
     import codecs
@@ -134,6 +130,12 @@ else:
         if 'b' not in mode:
             encoding = locale.getpreferredencoding()
         return io.open(filename, mode, encoding=encoding)
+
+    def bytes_print(statement, stdout=None):
+        if stdout is None:
+            stdout = sys.stdout
+
+        stdout.write(statement)
 
 
 def compat_input(prompt):
