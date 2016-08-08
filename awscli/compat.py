@@ -44,18 +44,22 @@ class BinaryStdout(object):
     the line ending. This can be useful when printing commands where a
     windows style line ending would casuse errors.
     """
+    def __init__(self, stdout=None):
+        self.stdout = stdout
+        if self.stdout is None:
+            self.stdout = sys.stdout
 
-    def __enter__(self):
+    def __enter__(self, stdout=None):
         if sys.platform == "win32":
             import msvcrt
-            self.previous_mode = msvcrt.setmode(sys.stdout.fileno(),
-                                                os.O_BINARY)
-        return sys.stdout
+            self.previous_mode = msvcrt.setmode(
+                self.stdout.fileno(), os.O_BINARY)
+        return self.stdout
 
     def __exit__(self, type, value, traceback):
         if sys.platform == "win32":
             import msvcrt
-            msvcrt.setmode(sys.stdout.fileno(), self.previous_mode)
+            msvcrt.setmode(self.stdout.fileno(), self.previous_mode)
 
 
 if six.PY3:
@@ -93,12 +97,13 @@ if six.PY3:
         if stdout is None:
             stdout = sys.stdout
 
-        if getattr(stdout, 'buffer', None):
-            stdout.buffer.write(statement)
-        else:
-            # If it is not possible to write to the standard out buffer.
-            # The next best option is to decode and write to standard out.
-            stdout.write(statement.decode('utf-8'))
+        with BinaryStdout(stdout) as binary_stdout:
+            if getattr(stdout, 'buffer', None):
+                binary_stdout.buffer.write(statement)
+            else:
+                # If it is not possible to write to the standard out buffer.
+                # The next best option is to decode and write to standard out.
+                binary_stdout.write(statement.decode('utf-8'))
 
 else:
     import codecs
@@ -135,7 +140,8 @@ else:
         if stdout is None:
             stdout = sys.stdout
 
-        stdout.write(statement)
+        with BinaryStdout(stdout) as binary_stdout:
+            binary_stdout.write(statement)
 
 
 def compat_input(prompt):

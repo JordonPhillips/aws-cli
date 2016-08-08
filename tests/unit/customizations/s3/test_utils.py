@@ -527,7 +527,7 @@ class TestUniPrint(unittest.TestCase):
         self.assertEqual(buf.getvalue(), b'SomeChars??OtherChars')
 
 
-class TestBytesPrint(unittest.TestCase):
+class TestStdoutBytesWriter(unittest.TestCase):
     def setUp(self):
         self.stdout = mock.Mock()
         self.stdout.buffer = self.stdout
