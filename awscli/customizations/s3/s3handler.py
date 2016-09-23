@@ -511,5 +511,5 @@ class S3TransferStreamHandler(BaseS3Handler):
             LOGGER.debug('Exception caught during task execution: %s',
                          str(e), exc_info=True)
             # TODO: Update when S3Handler is refactored
-            uni_print("Transfer failed: %s \n" % str(e))
+            uni_print("Transfer failed: %s \n" % str(e), sys.stderr)
             return CommandResult(1, 0)

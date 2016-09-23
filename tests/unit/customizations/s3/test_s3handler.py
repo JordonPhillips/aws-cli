@@ -19,7 +19,7 @@ import mock
 from s3transfer.manager import TransferManager, TransferFuture
 
 import awscli.customizations.s3.utils
-from awscli.testutils import unittest, capture_input
+from awscli.testutils import unittest, capture_input, capture_output
 from awscli import EnvironmentVariables
 from awscli.compat import six
 from awscli.customizations.s3.s3handler import S3Handler
@@ -1003,7 +1003,10 @@ class TestS3TransferHandler(S3HandlerBaseTest):
         self.transfer_future.result.side_effect = Exception()
 
         with capture_input(b'foobar'):
-            response = handler.call([file])
+            with capture_output() as output:
+                response = handler.call([file])
+                self.assertEqual(output.stdout.getvalue(), '')
+                self.assertIn('Transfer failed:', output.stderr.getvalue())
 
         self.assertEqual(response.num_tasks_failed, 1)
         self.assertEqual(response.num_tasks_warned, 0)
@@ -1030,7 +1033,10 @@ class TestS3TransferHandler(S3HandlerBaseTest):
 
         self.transfer_future.result.side_effect = Exception()
 
-        response = handler.call([file])
+        with capture_output() as output:
+            response = handler.call([file])
+            self.assertEqual(output.stdout.getvalue(), '')
+            self.assertIn('Transfer failed:', output.stderr.getvalue())
         self.assertEqual(response.num_tasks_failed, 1)
         self.assertEqual(response.num_tasks_warned, 0)
 
