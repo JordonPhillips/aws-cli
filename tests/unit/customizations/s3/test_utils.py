@@ -10,42 +10,42 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
-from awscli.testutils import unittest, temporary_file
 import argparse
-import errno
-import os
-import tempfile
-import shutil
-import ntpath
-import time
 import datetime
+import errno
 import io
-
+import ntpath
+import os
+import shutil
+import tempfile
+import time
 import mock
+
 from dateutil.tz import tzlocal
 from nose.tools import assert_equal
 from s3transfer.futures import TransferMeta, TransferFuture
 from s3transfer.compat import seekable
 from botocore.hooks import HierarchicalEmitter
 
-from awscli.compat import queue
 from awscli.compat import StringIO
-from awscli.testutils import FileCreator
+from awscli.compat import queue
+from awscli.customizations.s3.results import WarningResult
 from awscli.customizations.s3.utils import (
     find_bucket_key,
     guess_content_type, relative_path,
     StablePriorityQueue, BucketLister, get_file_stat, AppendFilter,
     create_warning, human_readable_size, human_readable_to_bytes,
-    set_file_utime, SetFileUtimeError, RequestParamsMapper, uni_print,
-    StdoutBytesWriter, ProvideSizeSubscriber, OnDoneFilteredSubscriber,
+    set_file_utime, SetFileUtimeError, RequestParamsMapper, StdoutBytesWriter,
+    ProvideSizeSubscriber, OnDoneFilteredSubscriber,
     ProvideUploadContentTypeSubscriber, ProvideCopyContentTypeSubscriber,
     ProvideLastModifiedTimeSubscriber, DirectoryCreatorSubscriber,
     DeleteSourceObjectSubscriber, DeleteSourceFileSubscriber,
     DeleteCopySourceObjectSubscriber, NonSeekableStream, CreateDirectoryError)
-from awscli.customizations.s3.results import WarningResult
+from awscli.testutils import FileCreator
+from awscli.testutils import unittest, temporary_file
 from tests.unit.customizations.s3 import FakeTransferFuture
-from tests.unit.customizations.s3 import FakeTransferFutureMeta
 from tests.unit.customizations.s3 import FakeTransferFutureCallArgs
+from tests.unit.customizations.s3 import FakeTransferFutureMeta
 
 
 def test_human_readable_size():
@@ -402,53 +402,6 @@ class TestRequestParamsMapperSSE(unittest.TestCase):
              'CopySourceSSECustomerKey': 'my-sse-c-copy-source-key',
              'SSECustomerAlgorithm': 'AES256',
              'SSECustomerKey': 'my-sse-c-key'})
-
-
-class MockPipedStdout(io.BytesIO):
-    '''Mocks `sys.stdout`.
-    We can't use `TextIOWrapper` because calling
-    `TextIOWrapper(.., encoding=None)` sets the ``encoding`` attribute to
-    `UTF-8`.
-    The attribute is also `readonly` in `TextIOWrapper` and `TextIOBase` so it
-    cannot be overwritten in subclasses. For these reasons we mock `sys.stdout`.
-    '''
-    def __init__(self):
-        self.encoding = None
-
-        super(MockPipedStdout, self).__init__()
-
-    def write(self, str):
-        # sys.stdout.write() will default to encoding to ascii, when its
-        # `encoding` is `None`.
-        if self.encoding is None:
-            str = str.encode('ascii')
-        else:
-            str = str.encode(self.encoding)
-        super(MockPipedStdout, self).write(str)
-
-
-class TestUniPrint(unittest.TestCase):
-
-    def test_out_file_with_encoding_attribute(self):
-        buf = io.BytesIO()
-        out = io.TextIOWrapper(buf, encoding='utf-8')
-        uni_print(u'\u2713', out)
-        self.assertEqual(buf.getvalue(), u'\u2713'.encode('utf-8'))
-
-    def test_encoding_with_encoding_none(self):
-        '''When the output of the aws command is being piped,
-        the `encoding` attribute of `sys.stdout` is `None`.'''
-        out = MockPipedStdout()
-        uni_print(u'SomeChars\u2713\u2714OtherChars', out)
-        self.assertEqual(out.getvalue(), b'SomeChars??OtherChars')
-
-    def test_encoding_statement_fails_are_replaced(self):
-        buf = io.BytesIO()
-        out = io.TextIOWrapper(buf, encoding='ascii')
-        uni_print(u'SomeChars\u2713\u2714OtherChars', out)
-        # We replace the characters that can't be encoded
-        # with '?'.
-        self.assertEqual(buf.getvalue(), b'SomeChars??OtherChars')
 
 
 class TestBytesPrint(unittest.TestCase):
