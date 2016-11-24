@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2012-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
@@ -17,7 +18,7 @@ import logging
 import mock
 from awscli.compat import six
 from botocore.vendored.requests import models
-from botocore.exceptions import NoCredentialsError
+from botocore.exceptions import NoCredentialsError, ClientError
 from botocore.compat import OrderedDict
 import botocore.model
 
@@ -172,6 +173,9 @@ class FakeSession(object):
         self.profile = None
         self.stream_logger_args = None
         self.credentials = 'fakecredentials'
+        self.client = mock.Mock()
+        self.client.list_objects.return_value = {}
+        self.client.can_paginate.return_value = False
 
     def register(self, event_name, handler):
         self.emitter.register(event_name, handler)
@@ -190,10 +194,7 @@ class FakeSession(object):
             return self.emitter
 
     def create_client(self, *args, **kwargs):
-        client = mock.Mock()
-        client.list_objects.return_value = {}
-        client.can_paginate.return_value = False
-        return client
+        return self.client
 
     def get_available_services(self):
         return ['s3']
@@ -269,6 +270,23 @@ class TestCliDriver(unittest.TestCase):
         driver.main('s3 list-objects --bucket foo --profile foo'.split())
         expected = {'log_level': logging.ERROR, 'logger_name': 'awscli'}
         self.assertEqual(driver.session.stream_logger_args[1], expected)
+
+    def test_unicode_service_error(self):
+        error_response = {'Error': {
+            'Code': 'ErrorCode',
+            'Message': u'é'
+        }}
+        error = ClientError(error_response, 's3')
+        self.session.client.list_objects.side_effect = error
+        driver = CLIDriver(session=self.session)
+
+        stderr = mock.Mock()
+        with mock.patch('sys.stderr', stderr):
+            rc = driver.main('s3 list-objects --bucket foo'.split())
+        expected_stderr = (u'An error occurred (ErrorCode) when calling '
+                           u'the s3 operation: é')
+        stderr.write.assert_any_call(expected_stderr)
+        self.assertEqual(rc, 255)
 
     def test_ctrl_c_is_handled(self):
         driver = CLIDriver(session=self.session)

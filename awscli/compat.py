@@ -86,7 +86,7 @@ if six.PY3:
             encoding = locale.getpreferredencoding()
         return open(filename, mode, encoding=encoding)
 
-    def bytes_print(statement, stdout=None):
+    def bytes_print(statement, stdout=None, encoding='utf-8'):
         """
         This function is used to write raw bytes to stdout.
         """
@@ -98,7 +98,7 @@ if six.PY3:
         else:
             # If it is not possible to write to the standard out buffer.
             # The next best option is to decode and write to standard out.
-            stdout.write(statement.decode('utf-8'))
+            stdout.write(statement.decode(encoding))
 
 else:
     import codecs
@@ -131,7 +131,7 @@ else:
             encoding = locale.getpreferredencoding()
         return io.open(filename, mode, encoding=encoding)
 
-    def bytes_print(statement, stdout=None):
+    def bytes_print(statement, stdout=None, encoding=None):
         if stdout is None:
             stdout = sys.stdout
 

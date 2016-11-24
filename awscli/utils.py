@@ -181,7 +181,6 @@ def uni_print(statement, out_file=None):
         # ``sys.stdout.encoding`` is ``None``.
         if new_encoding is None:
             new_encoding = 'ascii'
-        new_statement = statement.encode(
-            new_encoding, 'replace').decode(new_encoding)
-        out_file.write(new_statement)
+        new_statement = statement.encode(new_encoding, 'replace')
+        out_file.write(new_statement.decode(new_encoding))
     out_file.flush()

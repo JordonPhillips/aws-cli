@@ -38,6 +38,8 @@ from awscli.arguments import BooleanArgument
 from awscli.arguments import CLIArgument
 from awscli.arguments import UnknownArgumentError
 from awscli.argprocess import unpack_argument
+from awscli.utils import uni_print
+from awscli.compat import six
 
 
 LOG = logging.getLogger('awscli.clidriver')
@@ -209,7 +211,8 @@ class CLIDriver(object):
             LOG.debug("Exception caught in main()", exc_info=True)
             LOG.debug("Exiting with rc 255")
             sys.stderr.write("\n")
-            sys.stderr.write("%s\n" % e)
+            uni_print(six.text_type(e), sys.stderr)
+            sys.stderr.write("\n")
             return 255
 
     def _emit_session_event(self):

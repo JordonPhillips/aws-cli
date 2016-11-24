@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
@@ -13,6 +14,7 @@
 import io
 import signal
 import os
+import mock
 
 from awscli.testutils import unittest, skip_if_windows
 from awscli.utils import split_on_commas, ignore_ctrl_c
