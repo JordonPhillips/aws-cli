@@ -22,6 +22,7 @@ from awscli.customizations.configure.set import ConfigureSetCommand
 from awscli.customizations.configure.get import ConfigureGetCommand
 from awscli.customizations.configure.list import ConfigureListCommand
 from awscli.customizations.configure.writer import ConfigFileWriter
+from awscli.customizations.configure.export import ExportCommand
 
 from . import mask_value
 
@@ -73,7 +74,8 @@ class ConfigureCommand(BasicCommand):
         {'name': 'list', 'command_class': ConfigureListCommand},
         {'name': 'get', 'command_class': ConfigureGetCommand},
         {'name': 'set', 'command_class': ConfigureSetCommand},
-        {'name': 'add-model', 'command_class': AddModelCommand}
+        {'name': 'add-model', 'command_class': AddModelCommand},
+        {'name': 'export', 'command_class': ExportCommand}
     ]
 
     # If you want to add new values to prompt, update this list here.
