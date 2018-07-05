@@ -1,0 +1,5 @@
+{
+  "category": "installation", 
+  "type": "bugfix", 
+  "description": "Increased the version range for PyYAML to pull in a python 3.7 compatible version."
+}
