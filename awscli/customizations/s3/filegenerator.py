@@ -314,6 +314,8 @@ class FileGenerator(object):
         # bucket and a specific path was given, we can just yield
         # that path and not have to call any operation in s3.
         bucket, prefix = find_bucket_key(s3_path)
+        if prefix.endswith('/'):
+            prefix = prefix[:-1]
         if not dir_op and prefix:
             yield self._list_single_object(s3_path)
         else:
